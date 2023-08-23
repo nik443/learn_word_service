@@ -1,0 +1,41 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: rgb(153, 204, 184);
+}
+
+.wrapper {
+    width: 800px;
+    height: 100vh;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%);
+    background-color: aqua;
+}
+
+header {
+    padding: 10px;
+    background-color: rgb(163, 144, 144);
+    display: flex;
+    justify-content: space-between;
+}
+
+nav a{
+    margin-right: 10px;
+}
+
+.content {
+    position: absolute;
+    top: 50%;
+    transform: translate(0% -50%);
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    padding: 10px;
+}
