@@ -29,9 +29,7 @@ nav a{
 }
 
 .content {
-    position: absolute;
-    top: 50%;
-    transform: translate(0% -50%);
+    padding: 50px 0;
 }
 
 footer {

@@ -1,4 +1,6 @@
 from typing import Any, Dict
+from ast import literal_eval
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView
 from django.forms.models import BaseModelForm
@@ -10,6 +12,7 @@ from django.views.decorators.cache import never_cache
 
 from .forms import *
 from .utils import *
+from .models import *
 
 # Create your views here.
 
@@ -38,9 +41,15 @@ def learn_words(request):
 def user_cabinet(request):
     return render(request, 'user_cabinet.html', {'title': 'Личный кабинет', 'menu': MixinDataParams.menu})
 
-@never_cache
-def user_dictionary(request):
-    return render(request, 'user_dictionary.html', {'title': 'Мой словарь', 'menu': MixinDataParams.menu})
+class UserDictionary(MixinDataParams, TemplateView):
+    template_name = 'user_dictionary.html'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        dictionary = literal_eval(self.request.user.userdictionaries.dictionary)
+        c_def = self.get_user_context(title='Мой словарь', dictionary = dictionary)
+        return dict(list(context.items()) + list(c_def.items()))
+
 
 class RegisterUser(MixinDataParams, CreateView):    
     form_class = RegisterUserForm 
