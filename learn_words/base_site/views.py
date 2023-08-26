@@ -33,9 +33,27 @@ class AboutPage(MixinDataParams, TemplateView):
         c_def = self.get_user_context(title='О сайте')
         return dict(list(context.items()) + list(c_def.items()))
 
-@never_cache
-def learn_words(request):
-    return render(request, 'learn.html', {'title': 'Учить слова', 'menu': MixinDataParams.menu})
+
+class LearnWords(MixinDataParams, CreateView):
+    form_class = CreateWordInMasterDictForm
+    template_name = 'learn.html'
+    success_url = reverse_lazy('learn_words')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Учить слова')
+        return dict(list(context.items()) + list(c_def.items()))
+    
+    def form_valid(self, form):
+        cleaned_word = form.cleaned_data['word']
+        cleaned_translation = form.cleaned_data['translation']
+        if not MasterDictionaries.objects.filter(word = cleaned_word).exists(): # слова в мастер-словаре должны быть уникальными
+            form.save()
+        user_dictionary = literal_eval(self.request.user.userdictionaries.dictionary) # получение словаря пользователя
+        user_dictionary[cleaned_word] = cleaned_translation
+        user_dictionary = dict(sorted(user_dictionary.items())) # сортировка словаря пользователя
+        UserDictionaries.objects.filter(user = self.request.user.pk).update(dictionary = user_dictionary) # обновление словаря пользователя
+        return redirect('learn_words')
 
 @never_cache
 def user_cabinet(request):
@@ -46,7 +64,7 @@ class UserDictionary(MixinDataParams, TemplateView):
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        dictionary = literal_eval(self.request.user.userdictionaries.dictionary)
+        dictionary = literal_eval(self.request.user.userdictionaries.dictionary) # получение словаря пользователя
         c_def = self.get_user_context(title='Мой словарь', dictionary = dictionary)
         return dict(list(context.items()) + list(c_def.items()))
 

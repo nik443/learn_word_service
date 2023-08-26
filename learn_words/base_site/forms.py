@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 
+from .models import MasterDictionaries
+
 
 # Create your models here.
 class RegisterUserForm(UserCreationForm):
@@ -21,3 +23,9 @@ class RegisterUserForm(UserCreationForm):
 class LoginUserForm(AuthenticationForm):
     username = forms.CharField(label='Ник', widget=forms.TextInput(attrs={'class': 'form-input'}))
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+
+
+class CreateWordInMasterDictForm(forms.ModelForm):
+    class Meta:
+        model = MasterDictionaries
+        fields = ['word', 'translation']
