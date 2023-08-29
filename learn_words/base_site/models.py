@@ -19,7 +19,7 @@ class UserDictionaries(models.Model):
     
 class MasterDictionaries(models.Model):
     word = models.CharField(max_length=46, verbose_name='слово', db_index=True)
-    translation = models.CharField(max_length=26, verbose_name='перевод')
+    translation = models.CharField(max_length=50, verbose_name='перевод')
 
     def __str__(self) -> str:
         return self.word

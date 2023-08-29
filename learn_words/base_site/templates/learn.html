@@ -16,9 +16,12 @@
             {% endfor %}
             <button type="submit">Добавить слово с мой словарь</button>
         </form>
+
     </div> 
 
-    <div></div>
+    <div class="word_trening">
+        <a href="{% url 'training' %}">Тренировать мои слова</a>
+    </div>
 
 </div>
 {% endblock content %}

@@ -1,3 +1,6 @@
+from ast import literal_eval
+
+
 class MixinDataParams:
 
     menu = [
@@ -14,3 +17,6 @@ class MixinDataParams:
         else:
             context['menu'] = self.menu[::3] # menu: home, about
         return context
+    
+
+    

@@ -3,11 +3,12 @@ from ast import literal_eval
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView
+from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView, FormView
 from django.views.decorators.cache import never_cache
 
 from .forms import *
@@ -101,3 +102,54 @@ class LoginUser(MixinDataParams, LoginView):
 def logout_user(request):
     logout(request) 
     return redirect('login')
+
+
+class Training(MixinDataParams, FormView):
+
+    template_name = 'training.html'
+    success_url = reverse_lazy('learn_words')
+    form_class = TrainingForm
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        dictionary = literal_eval(self.request.user.userdictionaries.dictionary)
+        training_keys = list(dictionary.keys())
+        training_words = list(dictionary.values())
+        for i in range(5):
+            input = self.form_class.declared_fields['word' + str(i)]
+            input.label = training_words[i]
+            input.widget.attrs['data-word-translate'] = training_keys[i]
+            
+        c_def = self.get_user_context(title='Тренировка слов')
+        return dict(list(context.items()) + list(c_def.items()))
+    
+    def form_valid(self, form) -> HttpResponse:
+        mistakes = ''
+        for i in range(5):
+            user_translate_word = self.request.POST['word' + str(i)]
+            true_translate_word = form.declared_fields['word' + str(i)].widget.attrs['data-word-translate']
+            if user_translate_word != true_translate_word:
+                mistakes += f";В {i} поле вы ввели {user_translate_word}, а правильно {true_translate_word}"
+
+        if mistakes == '': 
+            mistakes = 'Ошибок нет'
+        else:
+            mistakes = mistakes[1:] # убераем первый ";" из строки, чтобы было проще парсить строку в массив
+        return redirect('result_training', mistakes_list = mistakes)
+
+
+@never_cache
+def result_training(request, mistakes_list):
+    return render(request, 'result_training.html', {
+        'title': 'Результаты тренировки', 
+        'menu': MixinDataParams.menu,
+        'mistakes_list': mistakes_list 
+        })  
+
+""" class ResultTraining(MixinDataParams, TemplateView):
+    template_name = 'result_training.html'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Мой словарь', )
+        return dict(list(context.items()) + list(c_def.items())) """

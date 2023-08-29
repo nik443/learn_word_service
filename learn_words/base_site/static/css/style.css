@@ -32,6 +32,10 @@ nav a{
     padding: 50px 0;
 }
 
+.word_trening {
+    margin-top: 50px;
+}
+
 footer {
     position: absolute;
     bottom: 0;

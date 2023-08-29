@@ -1,0 +1,31 @@
+{% extends 'base.html'%}
+
+{% block content %}
+<div class="content">
+    
+    <div class="trening">
+        <form method="post">
+            {% csrf_token %}
+
+            {% for f in form %}
+            <label for="{{ f.id_for_label }}">{{ f.label }}</label>
+            {{ f }}
+            <div class="form-error">{{ f.errors }}</div>
+            {% endfor %}
+
+            <button type="submit">Проверка</button>
+        </form>
+    </div>
+
+<!--     <h1>Мой словарь: </h1>
+
+    <div class="wordlist">
+        {% for key, word in dictionary.items %}
+        <div>{{ key }} - {{ word }}</div>
+        {% endfor %}
+    </div>
+
+    {{ labell }} -->
+
+</div>
+{% endblock content %}

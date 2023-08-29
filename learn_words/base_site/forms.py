@@ -1,11 +1,15 @@
-from typing import Any, Dict
+from ast import literal_eval
+
+from typing import Any, Dict, Mapping, Optional, Type, Union
 from django import forms
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+from django.forms.utils import ErrorList
 
-from .models import MasterDictionaries
+from .models import *
 
 
 # Create your models here.
@@ -29,3 +33,29 @@ class CreateWordInMasterDictForm(forms.ModelForm):
     class Meta:
         model = MasterDictionaries
         fields = ['word', 'translation']
+
+      
+class TrainingForm(forms.Form):
+
+    word0 = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-input', 
+        'data-word-translate': ''}))
+    word1 = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-input', 
+        'data-word-translate': ''}))
+    word2 = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-input',
+        'data-word-translate': ''}))
+    word3 = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-input',
+        'data-word-translate': ''}))
+    word4 = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-input',
+        'data-word-translate': ''}))
+
+    """ def clean_word0(self):
+        word = self.cleaned_data['word0']
+        print(dir(forms.CharField))
+        if word != '':
+            raise ValidationError('Верное написание: dadfadfadf')
+        return word """
