@@ -3,12 +3,11 @@
 {% block content %}
 <div class="content">
     
-    <!-- {% for mistake in mistakes_list %}  -->
-    <!-- {% endfor %}
+    {% for mistake in mistakes_list %} 
+    <div class="mistake">{{ mistake }}</div>
+    {% endfor %}
 
-    <div class="result"></div> -->
-
-    <div class="mistake">{{ mistakes_list }}</div>
+    <!-- <div class="mistake">{{ mistakes_list }}</div> -->
 
 </div>
 {% endblock content %}

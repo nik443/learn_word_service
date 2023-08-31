@@ -1,4 +1,5 @@
 from ast import literal_eval
+from random import sample
 
 from typing import Any, Dict, Mapping, Optional, Type, Union
 from django import forms
@@ -37,25 +38,23 @@ class CreateWordInMasterDictForm(forms.ModelForm):
       
 class TrainingForm(forms.Form):
 
-    word0 = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-input', 
-        'data-word-translate': ''}))
-    word1 = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-input', 
-        'data-word-translate': ''}))
-    word2 = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-input',
-        'data-word-translate': ''}))
-    word3 = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-input',
-        'data-word-translate': ''}))
-    word4 = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-input',
-        'data-word-translate': ''}))
+    user_dict = UserDictionaries.objects.get(user_id=1).dictionary
+    user_dict = literal_eval(user_dict)
+    user_dict = list(user_dict.items())
+    user_dict = sample(user_dict, 5)
 
-    """ def clean_word0(self):
-        word = self.cleaned_data['word0']
-        print(dir(forms.CharField))
-        if word != '':
-            raise ValidationError('Верное написание: dadfadfadf')
-        return word """
+    word0 = forms.CharField(label=user_dict[0][1], widget=forms.TextInput(attrs={
+        'class': 'form-input', 
+        'data-word-translate': user_dict[0][0]}))
+    word1 = forms.CharField(label=user_dict[1][1], widget=forms.TextInput(attrs={
+        'class': 'form-input', 
+        'data-word-translate': user_dict[1][0]}))
+    word2 = forms.CharField(label=user_dict[2][1], widget=forms.TextInput(attrs={
+        'class': 'form-input',
+        'data-word-translate': user_dict[2][0]}))
+    word3 = forms.CharField(label=user_dict[3][1], widget=forms.TextInput(attrs={
+        'class': 'form-input',
+        'data-word-translate': user_dict[3][0]}))
+    word4 = forms.CharField(label=user_dict[4][1], widget=forms.TextInput(attrs={
+        'class': 'form-input',
+        'data-word-translate': user_dict[4][0]}))

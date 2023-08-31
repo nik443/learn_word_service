@@ -115,10 +115,10 @@ class Training(MixinDataParams, FormView):
         dictionary = literal_eval(self.request.user.userdictionaries.dictionary)
         training_keys = list(dictionary.keys())
         training_words = list(dictionary.values())
-        for i in range(5):
+        """ for i in range(5):
             input = self.form_class.declared_fields['word' + str(i)]
             input.label = training_words[i]
-            input.widget.attrs['data-word-translate'] = training_keys[i]
+            input.widget.attrs['data-word-translate'] = training_keys[i] """
             
         c_def = self.get_user_context(title='Тренировка слов')
         return dict(list(context.items()) + list(c_def.items()))
@@ -143,13 +143,5 @@ def result_training(request, mistakes_list):
     return render(request, 'result_training.html', {
         'title': 'Результаты тренировки', 
         'menu': MixinDataParams.menu,
-        'mistakes_list': mistakes_list 
+        'mistakes_list': mistakes_list.split(';')
         })  
-
-""" class ResultTraining(MixinDataParams, TemplateView):
-    template_name = 'result_training.html'
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Мой словарь', )
-        return dict(list(context.items()) + list(c_def.items())) """
