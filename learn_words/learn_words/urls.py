@@ -21,7 +21,6 @@ from learn_words import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('base_site.urls')),
-    path("__debug__/", include("debug_toolbar.urls")),
 ]
 
 if settings.DEBUG: # в случае, если режим DEBUG включен, то работает django debug toolbar

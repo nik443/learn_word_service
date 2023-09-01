@@ -1,5 +1,5 @@
 from ast import literal_eval
-from random import sample
+import random
 
 from typing import Any, Dict, Mapping, Optional, Type, Union
 from django import forms
@@ -38,23 +38,22 @@ class CreateWordInMasterDictForm(forms.ModelForm):
       
 class TrainingForm(forms.Form):
 
-    user_dict = UserDictionaries.objects.get(user_id=1).dictionary
-    user_dict = literal_eval(user_dict)
-    user_dict = list(user_dict.items())
-    user_dict = sample(user_dict, 5)
+    def __init__(self, *args, **kwargs):
 
-    word0 = forms.CharField(label=user_dict[0][1], widget=forms.TextInput(attrs={
-        'class': 'form-input', 
-        'data-word-translate': user_dict[0][0]}))
-    word1 = forms.CharField(label=user_dict[1][1], widget=forms.TextInput(attrs={
-        'class': 'form-input', 
-        'data-word-translate': user_dict[1][0]}))
-    word2 = forms.CharField(label=user_dict[2][1], widget=forms.TextInput(attrs={
-        'class': 'form-input',
-        'data-word-translate': user_dict[2][0]}))
-    word3 = forms.CharField(label=user_dict[3][1], widget=forms.TextInput(attrs={
-        'class': 'form-input',
-        'data-word-translate': user_dict[3][0]}))
-    word4 = forms.CharField(label=user_dict[4][1], widget=forms.TextInput(attrs={
-        'class': 'form-input',
-        'data-word-translate': user_dict[4][0]}))
+        self.user = kwargs.pop('user', None)
+        self.dictionary = literal_eval(self.user.userdictionaries.dictionary)
+        self.dictionary = list(self.dictionary.items())
+        self.words = random.sample(self.dictionary, 5)
+
+        word0 = forms.CharField(label=self.words[0][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word1 = forms.CharField(label=self.words[1][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word2 = forms.CharField(label=self.words[2][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word3 = forms.CharField(label=self.words[3][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word4 = forms.CharField(label=self.words[4][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
+
+        super(TrainingForm, self).__init__(*args, **kwargs)
+        self.fields[self.words[0][0]] = word0
+        self.fields[self.words[1][0]] = word1
+        self.fields[self.words[2][0]] = word2
+        self.fields[self.words[3][0]] = word3
+        self.fields[self.words[4][0]] = word4

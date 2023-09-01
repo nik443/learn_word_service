@@ -104,44 +104,47 @@ def logout_user(request):
     return redirect('login')
 
 
-class Training(MixinDataParams, FormView):
+class Training(MixinDataParams, TemplateView):
 
     template_name = 'training.html'
-    success_url = reverse_lazy('learn_words')
-    form_class = TrainingForm
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        dictionary = literal_eval(self.request.user.userdictionaries.dictionary)
-        training_keys = list(dictionary.keys())
-        training_words = list(dictionary.values())
-        """ for i in range(5):
-            input = self.form_class.declared_fields['word' + str(i)]
-            input.label = training_words[i]
-            input.widget.attrs['data-word-translate'] = training_keys[i] """
-            
-        c_def = self.get_user_context(title='Тренировка слов')
+        form_training = TrainingForm(self.request.POST, user=self.request.user)
+        c_def = self.get_user_context(title='Training', form=form_training)
         return dict(list(context.items()) + list(c_def.items()))
-    
-    def form_valid(self, form) -> HttpResponse:
-        mistakes = ''
-        for i in range(5):
-            user_translate_word = self.request.POST['word' + str(i)]
-            true_translate_word = form.declared_fields['word' + str(i)].widget.attrs['data-word-translate']
-            if user_translate_word != true_translate_word:
-                mistakes += f";В {i} поле вы ввели {user_translate_word}, а правильно {true_translate_word}"
-
-        if mistakes == '': 
-            mistakes = 'Ошибок нет'
-        else:
-            mistakes = mistakes[1:] # убераем первый ";" из строки, чтобы было проще парсить строку в массив
-        return redirect('result_training', mistakes_list = mistakes)
 
 
 @never_cache
-def result_training(request, mistakes_list):
+def result_training(request):
+
+    mistakes = ''
+    input_list = list(request.POST.items())[1:] # получили значения и правильный перевод слов
+    for i in range(5):
+        user_translate = input_list[i][1]
+        true_translate = input_list[i][0]
+        if user_translate != true_translate: 
+            mistakes += f";В {i + 1} поле вы ввели {user_translate}, а правильно {true_translate}"
+
+    if mistakes == '': 
+        mistakes = ['Ошибок нет']
+    else:
+        mistakes = mistakes[1:] # убераем первый ";" из строки, чтобы было проще парсить строку в массив
+        mistakes = mistakes.split(';')
+
     return render(request, 'result_training.html', {
-        'title': 'Результаты тренировки', 
+        'title': 'Training results', 
         'menu': MixinDataParams.menu,
-        'mistakes_list': mistakes_list.split(';')
+        'mistakes': mistakes
         })  
+
+
+
+
+
+
+
+
+
+
+
