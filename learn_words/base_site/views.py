@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView, FormView
 from django.views.decorators.cache import never_cache
+from django.utils import timezone
 
 from .forms import *
 from .utils import *
@@ -53,7 +54,9 @@ class LearnWords(MixinDataParams, CreateView):
         user_dictionary = literal_eval(self.request.user.userdictionaries.dictionary) # получение словаря пользователя
         user_dictionary[cleaned_word] = cleaned_translation
         user_dictionary = dict(sorted(user_dictionary.items())) # сортировка словаря пользователя
-        UserDictionaries.objects.filter(user = self.request.user.pk).update(dictionary = user_dictionary) # обновление словаря пользователя
+        UserDictionaries.objects.filter(user = self.request.user.pk).update(
+            dictionary = user_dictionary, # обновление словаря пользователя
+            dictionary_update = timezone.now()) # обновление даты изменения словаря
         return redirect('learn_words')
 
 @never_cache
@@ -82,6 +85,7 @@ class RegisterUser(MixinDataParams, CreateView):
     
     def form_valid(self, form):
         user = form.save()
+        UserDictionaries(dictionary='{}', user_id=user.id).save()
         login(self.request, user)
         return redirect('home')
 
@@ -110,10 +114,15 @@ class Training(MixinDataParams, TemplateView):
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        form_training = TrainingForm(self.request.POST, user=self.request.user)
-        c_def = self.get_user_context(title='Training', form=form_training)
-        return dict(list(context.items()) + list(c_def.items()))
-
+        try:    
+            user_dict = literal_eval(self.request.user.userdictionaries.dictionary)
+            user_dict = list(user_dict.items())
+            form_training = TrainingForm(self.request.POST, words=random.sample(user_dict, 5))
+            c_def = self.get_user_context(title='Training', form=form_training)
+        except ValueError:
+            c_def = self.get_user_context(title='Training', title_error='В вашем словаре слишком мало слов для повторения, минимум 5')
+        finally:
+            return dict(list(context.items()) + list(c_def.items()))
 
 @never_cache
 def result_training(request):
@@ -137,7 +146,6 @@ def result_training(request):
         'menu': MixinDataParams.menu,
         'mistakes': mistakes
         })  
-
 
 
 

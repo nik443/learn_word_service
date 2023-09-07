@@ -40,10 +40,7 @@ class TrainingForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
 
-        self.user = kwargs.pop('user', None)
-        self.dictionary = literal_eval(self.user.userdictionaries.dictionary)
-        self.dictionary = list(self.dictionary.items())
-        self.words = random.sample(self.dictionary, 5)
+        self.words = kwargs.pop('words', None)
 
         word0 = forms.CharField(label=self.words[0][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
         word1 = forms.CharField(label=self.words[1][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
