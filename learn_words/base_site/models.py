@@ -27,3 +27,13 @@ class MasterDictionaries(models.Model):
     class Meta:
         verbose_name = 'Слово в словарь'
         verbose_name_plural = 'Главный словарь'
+
+
+class UserDictionariesNew(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    word = models.ForeignKey(MasterDictionaries, on_delete=models.CASCADE)
+    last_training_date = models.DateTimeField(verbose_name='последняя тренировка')
+    last_training_result = models.BooleanField(verbose_name='результат последней тренировки')
+
+    def __str__(self) -> str:
+        return f'{self.user} - {self.word}'

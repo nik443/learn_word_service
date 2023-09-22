@@ -65,11 +65,16 @@ def user_cabinet(request):
 
 class UserDictionary(MixinDataParams, TemplateView):
     template_name = 'user_dictionary.html'
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        dictionary = literal_eval(self.request.user.userdictionaries.dictionary) # получение словаря пользователя
-        c_def = self.get_user_context(title='Мой словарь', dictionary = dictionary)
+
+        dictionary = {}
+        for i in UserDictionariesNew.objects.filter(user=self.request.user):
+            dictionary[i.word.word] = i.word.translation
+
+        print(dictionary)
+        c_def = self.get_user_context(title='Мой словарь', dictionary=dictionary)
         return dict(list(context.items()) + list(c_def.items()))
 
 
