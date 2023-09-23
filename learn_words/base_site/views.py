@@ -3,11 +3,11 @@ from ast import literal_eval
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, TemplateView, FormView
 from django.views.decorators.cache import never_cache
 from django.utils import timezone
@@ -36,6 +36,8 @@ class AboutPage(MixinDataParams, TemplateView):
         return dict(list(context.items()) + list(c_def.items()))
 
 
+""" ADD WORDS IN USER'S DICTIONARY MECH """
+
 class LearnWords(MixinDataParams, CreateView):
     form_class = CreateWordInMasterDictForm
     template_name = 'learn.html'
@@ -58,6 +60,33 @@ class LearnWords(MixinDataParams, CreateView):
             dictionary = user_dictionary, # обновление словаря пользователя
             dictionary_update = timezone.now()) # обновление даты изменения словаря
         return redirect('learn_words')
+    
+def addWordInUserDict(request):
+    user_word = request.POST['user_word']
+    user_error = ''
+    try:
+        word = MasterDictionaries.objects.get(word=user_word)
+        if word.userdictionariesnew_set.filter(user=request.user).exists(): # проверка наличия введенного слова в словаре пользователя 
+            user_error = 'Введенное слово уже есть в вашем словаре'
+        else:
+            UserDictionariesNew(user=request.user, word=word).save()
+    except ObjectDoesNotExist:
+        user_error = 'Введенного слова не существует, может это сленг...'
+
+    context = {
+            'title': 'Учить слова', 
+            'menu': MixinDataParams.menu,
+        }
+    if user_error:
+        context['user_error'] = user_error
+        return render(request, 'learn.html', context)
+    else:
+        # return redirect('home')
+        return render(request, 'success_add_word.html')
+
+""" ADD WORDS IN USER'S DICTIONARY MECH AND """
+
+""" USER'S CABINET MECH """
 
 @never_cache
 def user_cabinet(request):
@@ -73,10 +102,10 @@ class UserDictionary(MixinDataParams, TemplateView):
         for i in UserDictionariesNew.objects.filter(user=self.request.user):
             dictionary[i.word.word] = i.word.translation
 
-        print(dictionary)
         c_def = self.get_user_context(title='Мой словарь', dictionary=dictionary)
         return dict(list(context.items()) + list(c_def.items()))
 
+""" USER'S CABINET MECH AND"""
 
 class RegisterUser(MixinDataParams, CreateView):    
     form_class = RegisterUserForm 

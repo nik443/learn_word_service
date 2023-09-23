@@ -32,8 +32,11 @@ class MasterDictionaries(models.Model):
 class UserDictionariesNew(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     word = models.ForeignKey(MasterDictionaries, on_delete=models.CASCADE)
-    last_training_date = models.DateTimeField(verbose_name='последняя тренировка')
-    last_training_result = models.BooleanField(verbose_name='результат последней тренировки')
+    last_training_date = models.DateTimeField(verbose_name='последняя тренировка', default=timezone.now)
+    last_training_result = models.BooleanField(verbose_name='результат последней тренировки', default=False)
 
     def __str__(self) -> str:
         return f'{self.user} - {self.word}'
+    
+    class Meta:
+        ordering = ['last_training_result', '-last_training_date']

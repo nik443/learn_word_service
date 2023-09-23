@@ -4,16 +4,15 @@
 <div class="content">
     
     <div>
-        <form method="post">
+        <form method="post" action="{% url 'add_word_in_user_dict' %}">
             {% csrf_token %}
-        
-            {% for f in form %}
             <p>
-                <label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}</label>
-                {{ f }}
+                <label class="form-label" for="user_word">Ваше слово: </label>
+                <input type="text" name="user_word" id="user_word" required="True"> 
             </p>
-            <div class="form-error">{{ f.errors }}</div>
-            {% endfor %}
+            {% if user_error %}
+            <p>{{ user_error }}</p>
+            {% endif %}
             <button type="submit">Добавить слово с мой словарь</button>
         </form>
 
