@@ -81,7 +81,6 @@ def addWordInUserDict(request):
         context['user_error'] = user_error
         return render(request, 'learn.html', context)
     else:
-        # return redirect('home')
         return render(request, 'success_add_word.html')
 
 """ ADD WORDS IN USER'S DICTIONARY MECH AND """
@@ -141,19 +140,18 @@ def logout_user(request):
     logout(request) 
     return redirect('login')
 
-
+""" TRAINING USER'S WORD MECH """
 class Training(MixinDataParams, TemplateView):
 
     template_name = 'training.html'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        try:    
-            user_dict = literal_eval(self.request.user.userdictionaries.dictionary)
-            user_dict = list(user_dict.items())
-            form_training = TrainingForm(self.request.POST, words=random.sample(user_dict, 5))
+        try:
+            user_dict = list(UserDictionariesNew.objects.filter(user=self.request.user)[:5]) # получить слова для тренировки
+            form_training = TrainingForm(self.request.POST, words=user_dict)
             c_def = self.get_user_context(title='Training', form=form_training)
-        except ValueError:
+        except IndexError:
             c_def = self.get_user_context(title='Training', title_error='В вашем словаре слишком мало слов для повторения, минимум 5')
         finally:
             return dict(list(context.items()) + list(c_def.items()))
@@ -163,11 +161,23 @@ def result_training(request):
 
     mistakes = ''
     input_list = list(request.POST.items())[1:] # получили значения и правильный перевод слов
+    true_answer_list = []
+    false_answer_list = []
     for i in range(5):
         user_translate = input_list[i][1]
         true_translate = input_list[i][0]
         if user_translate != true_translate: 
             mistakes += f";В {i + 1} поле вы ввели {user_translate}, а правильно {true_translate}"
+            false_answer_list.append(true_translate)
+        else:
+            true_answer_list.append(true_translate)
+
+    def update_user_dict(answer_list, is_true_answer):
+        for i in answer_list: 
+            MasterDictionaries.objects.get(word=i).userdictionariesnew_set.filter(user=request.user).update(last_training_date=timezone.now(), last_training_result=is_true_answer)
+    
+    if true_answer_list: update_user_dict(true_answer_list, True)
+    if false_answer_list: update_user_dict(false_answer_list, True)
 
     if mistakes == '': 
         mistakes = ['Ошибок нет']
@@ -181,6 +191,7 @@ def result_training(request):
         'mistakes': mistakes
         })  
 
+""" TRAINING USER'S WORD MECH END """
 
 
 

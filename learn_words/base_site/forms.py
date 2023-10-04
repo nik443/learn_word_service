@@ -42,15 +42,17 @@ class TrainingForm(forms.Form):
 
         self.words = kwargs.pop('words', None)
 
-        word0 = forms.CharField(label=self.words[0][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
-        word1 = forms.CharField(label=self.words[1][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
-        word2 = forms.CharField(label=self.words[2][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
-        word3 = forms.CharField(label=self.words[3][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
-        word4 = forms.CharField(label=self.words[4][1], widget=forms.TextInput(attrs={'class': 'form-input'}))
+        # label - перевод
+        word0 = forms.CharField(label=self.words[0].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word1 = forms.CharField(label=self.words[1].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word2 = forms.CharField(label=self.words[2].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word3 = forms.CharField(label=self.words[3].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word4 = forms.CharField(label=self.words[4].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
 
+        # name - правильное значение
         super(TrainingForm, self).__init__(*args, **kwargs)
-        self.fields[self.words[0][0]] = word0
-        self.fields[self.words[1][0]] = word1
-        self.fields[self.words[2][0]] = word2
-        self.fields[self.words[3][0]] = word3
-        self.fields[self.words[4][0]] = word4
+        self.fields[self.words[0].word.word] = word0
+        self.fields[self.words[1].word.word] = word1
+        self.fields[self.words[2].word.word] = word2
+        self.fields[self.words[3].word.word] = word3
+        self.fields[self.words[4].word.word] = word4
