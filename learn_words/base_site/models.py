@@ -40,3 +40,15 @@ class UserDictionariesNew(models.Model):
     
     class Meta:
         ordering = ['last_training_result', '-last_training_date']
+
+
+class DatesLastAddedWordInUserDict(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    date_last_added_word = models.DateTimeField(verbose_name='последнее слово добавлено', default=timezone.now)
+
+    def __str__(self) -> str:
+        return f'{self.user} - {self.date_last_added_word}'
+    
+    class Meta:
+        verbose_name = 'Дата полседнего добавления слова в словарь пользователя'
+        verbose_name_plural = 'Даты полседнего добавления слова в словарь пользователей'

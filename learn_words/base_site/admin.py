@@ -6,3 +6,4 @@ from .models import *
 admin.site.register(UserDictionaries)
 admin.site.register(MasterDictionaries)
 admin.site.register(UserDictionariesNew)
+admin.site.register(DatesLastAddedWordInUserDict)

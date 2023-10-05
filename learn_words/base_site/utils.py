@@ -13,9 +13,6 @@ class MixinDataParams:
         context = kwargs
         if self.request.user.is_authenticated: 
             context['menu'] = self.menu
-            time_since_dict_update_hours = (timezone.now() - self.request.user.userdictionaries.dictionary_update).seconds / 60 / 60
-            if time_since_dict_update_hours > 2:
-                context['need_learn_words'] = 'Пора выучить новые слова'
         else:
             context['menu'] = self.menu[::3] # menu: home, about
         return context

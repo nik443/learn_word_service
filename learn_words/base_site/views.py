@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from ast import literal_eval
+from datetime import timedelta
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView
@@ -20,9 +21,16 @@ from .models import *
 
 class HomePage(MixinDataParams, TemplateView):
     template_name = 'index.html'
-
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
+
+        if self.request.user.is_authenticated:
+            date_last_added_word_more_1_days = (timezone.now() - self.request.user.dateslastaddedwordinuserdict.date_last_added_word) > timedelta(days=1)
+            if date_last_added_word_more_1_days:
+                context['need_learn_words'] = 'Пора выучить новые слова!'
+            else: 
+                context['need_learn_words'] = 'Сегодня норма изучения новых слов выполнена'
+
         c_def = self.get_user_context(title='Домашняя страница')
         return dict(list(context.items()) + list(c_def.items()))
 
@@ -69,7 +77,8 @@ def addWordInUserDict(request):
         if word.userdictionariesnew_set.filter(user=request.user).exists(): # проверка наличия введенного слова в словаре пользователя 
             user_error = 'Введенное слово уже есть в вашем словаре'
         else:
-            UserDictionariesNew(user=request.user, word=word).save()
+            UserDictionariesNew(user=request.user, word=word).save() # сохранение слова
+            DatesLastAddedWordInUserDict.objects.filter(user=request.user).update(date_last_added_word=timezone.now()) # обновление даты последнего добавления слова
     except ObjectDoesNotExist:
         user_error = 'Введенного слова не существует, может это сленг...'
 
@@ -118,8 +127,8 @@ class RegisterUser(MixinDataParams, CreateView):
     
     def form_valid(self, form):
         user = form.save()
-        UserDictionaries(dictionary='{}', user_id=user.id).save()
         login(self.request, user)
+        DatesLastAddedWordInUserDict.objects.create(user=self.request.user, date_last_added_word=(timezone.now() - timedelta(days=1)))
         return redirect('home')
 
 
@@ -182,7 +191,7 @@ def result_training(request):
     if mistakes == '': 
         mistakes = ['Ошибок нет']
     else:
-        mistakes = mistakes[1:] # убераем первый ";" из строки, чтобы было проще парсить строку в массив
+        mistakes = mistakes[1:] # убираем первый ";" из строки, чтобы было проще парсить строку в массив
         mistakes = mistakes.split(';')
 
     return render(request, 'result_training.html', {
