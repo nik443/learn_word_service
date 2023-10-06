@@ -3,10 +3,10 @@ from django.utils import timezone
 class MixinDataParams:
 
     menu = [
-        {'title': 'На главную', 'url_name': 'home'},
-        {'title': 'Личный кабинет', 'url_name': 'user_cabinet'}, 
-        {'title': 'Учить слова', 'url_name': 'learn_words'}, 
-        {'title': 'О сайте', 'url_name': 'about'}, 
+        {'title': 'На главную', 'url_name': 'base_site:home'},
+        {'title': 'Личный кабинет', 'url_name': 'base_site:user_cabinet'}, 
+        {'title': 'Учить слова', 'url_name': 'base_site:learn_words'}, 
+        {'title': 'О сайте', 'url_name': 'base_site:about'}, 
     ] 
 
     def get_user_context(self, **kwargs):

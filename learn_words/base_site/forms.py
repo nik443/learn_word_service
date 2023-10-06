@@ -33,7 +33,7 @@ class LoginUserForm(AuthenticationForm):
 class CreateWordInMasterDictForm(forms.ModelForm):
     class Meta:
         model = MasterDictionaries
-        fields = ['word', 'translation']
+        fields = ['word']
 
       
 class TrainingForm(forms.Form):

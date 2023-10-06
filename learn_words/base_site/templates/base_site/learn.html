@@ -1,10 +1,10 @@
-{% extends 'base.html'%}
+{% extends 'base_site/base.html'%}
 
 {% block content %}
 <div class="content">
     
     <div>
-        <form method="post" action="{% url 'add_word_in_user_dict' %}">
+        <form method="post" action="{% url 'base_site:add_word_in_user_dict' %}">
             {% csrf_token %}
             <p>
                 <label class="form-label" for="user_word">Ваше слово: </label>
@@ -19,7 +19,7 @@
     </div> 
 
     <div class="word_trening">
-        <a href="{% url 'training' %}">Тренировать мои слова</a>
+        <a href="{% url 'base_site:training' %}">Тренировать мои слова</a>
     </div>
 
 </div>

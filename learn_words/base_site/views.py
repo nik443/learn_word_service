@@ -1,13 +1,12 @@
 from typing import Any, Dict
-from ast import literal_eval
 from datetime import timedelta
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.forms.models import BaseModelForm
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.http import HttpResponse, Http404
+from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, TemplateView, FormView
 from django.views.decorators.cache import never_cache
@@ -20,7 +19,7 @@ from .models import *
 # Create your views here.
 
 class HomePage(MixinDataParams, TemplateView):
-    template_name = 'index.html'
+    template_name = 'base_site/index.html'
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
@@ -36,7 +35,7 @@ class HomePage(MixinDataParams, TemplateView):
 
 
 class AboutPage(MixinDataParams, TemplateView):
-    template_name = 'about.html'
+    template_name = 'base_site/about.html'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -48,8 +47,7 @@ class AboutPage(MixinDataParams, TemplateView):
 
 class LearnWords(MixinDataParams, CreateView):
     form_class = CreateWordInMasterDictForm
-    template_name = 'learn.html'
-    success_url = reverse_lazy('learn_words')
+    template_name = 'base_site/learn.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -58,28 +56,23 @@ class LearnWords(MixinDataParams, CreateView):
     
     def form_valid(self, form):
         cleaned_word = form.cleaned_data['word']
-        cleaned_translation = form.cleaned_data['translation']
         if not MasterDictionaries.objects.filter(word = cleaned_word).exists(): # слова в мастер-словаре должны быть уникальными
             form.save()
-        user_dictionary = literal_eval(self.request.user.userdictionaries.dictionary) # получение словаря пользователя
-        user_dictionary[cleaned_word] = cleaned_translation
-        user_dictionary = dict(sorted(user_dictionary.items())) # сортировка словаря пользователя
-        UserDictionaries.objects.filter(user = self.request.user.pk).update(
-            dictionary = user_dictionary, # обновление словаря пользователя
-            dictionary_update = timezone.now()) # обновление даты изменения словаря
-        return redirect('learn_words')
+        return redirect('base_site:learn_words')
     
+
 def addWordInUserDict(request):
     user_word = request.POST['user_word']
     user_error = ''
+
     try:
-        word = MasterDictionaries.objects.get(word=user_word)
-        if word.userdictionariesnew_set.filter(user=request.user).exists(): # проверка наличия введенного слова в словаре пользователя 
+        word = get_object_or_404(MasterDictionaries, word=user_word)
+        if word.userdictionaries_set.filter(user=request.user).exists(): # проверка наличия введенного слова в словаре пользователя 
             user_error = 'Введенное слово уже есть в вашем словаре'
         else:
-            UserDictionariesNew(user=request.user, word=word).save() # сохранение слова
+            UserDictionaries(user=request.user, word=word).save() # сохранение слова
             DatesLastAddedWordInUserDict.objects.filter(user=request.user).update(date_last_added_word=timezone.now()) # обновление даты последнего добавления слова
-    except ObjectDoesNotExist:
+    except Http404:
         user_error = 'Введенного слова не существует, может это сленг...'
 
     context = {
@@ -88,9 +81,9 @@ def addWordInUserDict(request):
         }
     if user_error:
         context['user_error'] = user_error
-        return render(request, 'learn.html', context)
+        return render(request, 'base_site/learn.html', context)
     else:
-        return render(request, 'success_add_word.html')
+        return render(request, 'base_site/success_add_word.html')
 
 """ ADD WORDS IN USER'S DICTIONARY MECH AND """
 
@@ -98,16 +91,16 @@ def addWordInUserDict(request):
 
 @never_cache
 def user_cabinet(request):
-    return render(request, 'user_cabinet.html', {'title': 'Личный кабинет', 'menu': MixinDataParams.menu})
+    return render(request, 'base_site/user_cabinet.html', {'title': 'Личный кабинет', 'menu': MixinDataParams.menu})
 
 class UserDictionary(MixinDataParams, TemplateView):
-    template_name = 'user_dictionary.html'
+    template_name = 'base_site/user_dictionary.html'
     
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
         dictionary = {}
-        for i in UserDictionariesNew.objects.filter(user=self.request.user):
+        for i in UserDictionaries.objects.filter(user=self.request.user):
             dictionary[i.word.word] = i.word.translation
 
         c_def = self.get_user_context(title='Мой словарь', dictionary=dictionary)
@@ -117,8 +110,7 @@ class UserDictionary(MixinDataParams, TemplateView):
 
 class RegisterUser(MixinDataParams, CreateView):    
     form_class = RegisterUserForm 
-    template_name = 'register.html' 
-    success_url = reverse_lazy('home')
+    template_name = 'base_site/register.html' 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -129,12 +121,12 @@ class RegisterUser(MixinDataParams, CreateView):
         user = form.save()
         login(self.request, user)
         DatesLastAddedWordInUserDict.objects.create(user=self.request.user, date_last_added_word=(timezone.now() - timedelta(days=1)))
-        return redirect('home')
+        return redirect('base_site:home')
 
 
 class LoginUser(MixinDataParams, LoginView):
     form_class = LoginUserForm 
-    template_name = 'login.html' 
+    template_name = 'base_site/login.html' 
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -142,22 +134,22 @@ class LoginUser(MixinDataParams, LoginView):
         return dict(list(context.items()) + list(c_def.items()))
     
     def get_success_url(self) -> str:
-        return reverse_lazy('home')
+        return reverse_lazy('base_site:home')
 
     
 def logout_user(request):
     logout(request) 
-    return redirect('login')
+    return redirect('base_site:login')
 
 """ TRAINING USER'S WORD MECH """
 class Training(MixinDataParams, TemplateView):
 
-    template_name = 'training.html'
+    template_name = 'base_site/training.html'
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         try:
-            user_dict = list(UserDictionariesNew.objects.filter(user=self.request.user)[:5]) # получить слова для тренировки
+            user_dict = list(get_list_or_404(UserDictionaries, user=self.request.user)[:5]) # получить слова для тренировки
             form_training = TrainingForm(self.request.POST, words=user_dict)
             c_def = self.get_user_context(title='Training', form=form_training)
         except IndexError:
@@ -183,10 +175,10 @@ def result_training(request):
 
     def update_user_dict(answer_list, is_true_answer):
         for i in answer_list: 
-            MasterDictionaries.objects.get(word=i).userdictionariesnew_set.filter(user=request.user).update(last_training_date=timezone.now(), last_training_result=is_true_answer)
+            MasterDictionaries.objects.get(word=i).userdictionaries_set.filter(user=request.user).update(last_training_date=timezone.now(), last_training_result=is_true_answer)
     
     if true_answer_list: update_user_dict(true_answer_list, True)
-    if false_answer_list: update_user_dict(false_answer_list, True)
+    if false_answer_list: update_user_dict(false_answer_list, False)
 
     if mistakes == '': 
         mistakes = ['Ошибок нет']
@@ -194,7 +186,7 @@ def result_training(request):
         mistakes = mistakes[1:] # убираем первый ";" из строки, чтобы было проще парсить строку в массив
         mistakes = mistakes.split(';')
 
-    return render(request, 'result_training.html', {
+    return render(request, 'base_site/result_training.html', {
         'title': 'Training results', 
         'menu': MixinDataParams.menu,
         'mistakes': mistakes

@@ -1,4 +1,4 @@
-{% extends 'base.html'%}
+{% extends 'base_site/base.html'%}
 
 {% block content %}
 <div class="content">
@@ -12,7 +12,7 @@
         </p>
         <div class="form-error">{{ f.errors }}</div>
         {% endfor %}
-        <button type="submit">Войти</button>
+        <button type="submit">Зарегистрироваться</button>
     </form>
 </div>
 {% endblock content %}

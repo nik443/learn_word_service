@@ -4,19 +4,7 @@ from django.utils import timezone
 
 
 # Create your models here.
-class UserDictionaries(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь', max_length=191, default=0)
-    dictionary = models.TextField(blank=True, verbose_name='Cловарь')
-    dictionary_update = models.DateTimeField(default=timezone.now)
 
-    def __str__(self) -> str: # отображение конкретной записи в админке
-        return self.user.username
-    
-    class Meta:
-        verbose_name = 'Словарь пользователея'
-        verbose_name_plural = 'Словари пользователей'
-
-    
 class MasterDictionaries(models.Model):
     word = models.CharField(max_length=46, verbose_name='слово', db_index=True)
     translation = models.CharField(max_length=50, verbose_name='перевод')
@@ -29,7 +17,7 @@ class MasterDictionaries(models.Model):
         verbose_name_plural = 'Главный словарь'
 
 
-class UserDictionariesNew(models.Model):
+class UserDictionaries(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     word = models.ForeignKey(MasterDictionaries, on_delete=models.CASCADE)
     last_training_date = models.DateTimeField(verbose_name='последняя тренировка', default=timezone.now)
@@ -40,6 +28,8 @@ class UserDictionariesNew(models.Model):
     
     class Meta:
         ordering = ['last_training_result', '-last_training_date']
+        verbose_name = 'Словарь пользователя'
+        verbose_name_plural = 'Словари пользователей'
 
 
 class DatesLastAddedWordInUserDict(models.Model):

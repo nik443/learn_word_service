@@ -3,6 +3,7 @@ from django.urls import path, re_path
 from .views import *
 
 
+app_name = 'base_site' # пространство имен
 urlpatterns = [
     path('', HomePage.as_view(), name='home'),
     path('about/', AboutPage.as_view(), name='about'),

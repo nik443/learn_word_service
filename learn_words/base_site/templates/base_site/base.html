@@ -24,9 +24,9 @@
     <div class="log_in_out">
         {% if request.user.is_authenticated %}
         <span>{{ user.username }}</span>
-        <a href="{% url 'logout' %}">Выйти</a>
+        <a href="{% url 'base_site:logout' %}">Выйти</a>
         {% else %}
-        <a href="{% url 'login' %}">Войти</a> | <a href="{% url 'register' %}">Регистрация</a>
+        <a href="{% url 'base_site:login' %}">Войти</a> | <a href="{% url 'base_site:register' %}">Регистрация</a>
         {% endif %}
     </div> 
 </header>

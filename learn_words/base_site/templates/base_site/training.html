@@ -1,11 +1,11 @@
-{% extends 'base.html'%}
+{% extends 'base_site/base.html'%}
 
 {% block content %}
 <div class="content">
     
     {% if form %}
     <div class="trening">
-        <form method="post" action="{% url 'result_training' %}">
+        <form method="post" action="{% url 'base_site:result_training' %}">
             {% csrf_token %}
 
             {% for f in form %}
