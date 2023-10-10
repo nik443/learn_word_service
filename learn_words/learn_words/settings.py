@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-6s-a+dj^ce5mmq!)x$%kw2!bu014m9)3$m%6nrzc^n)96fs_vw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -77,8 +77,12 @@ WSGI_APPLICATION = 'learn_words.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'learn_words_db',
+        'USER': 'nikita',
+        'PASSWORD': 'nikita01',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 

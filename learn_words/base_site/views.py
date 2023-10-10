@@ -1,5 +1,5 @@
-from typing import Any, Dict
 from datetime import timedelta
+from typing import Any, Dict
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView
@@ -8,9 +8,9 @@ from django.forms.models import BaseModelForm
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, TemplateView, FormView
 from django.views.decorators.cache import never_cache
-from django.utils import timezone
 
 from .forms import *
 from .utils import *
@@ -148,14 +148,18 @@ class Training(MixinDataParams, TemplateView):
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        try:
+        user_dict = list(get_list_or_404(UserDictionaries, user=self.request.user)[:5])
+        form_training = TrainingForm(self.request.POST, words=user_dict)
+        c_def = self.get_user_context(title='Training', form=form_training)
+        return dict(list(context.items()) + list(c_def.items()))
+        """ try:
             user_dict = list(get_list_or_404(UserDictionaries, user=self.request.user)[:5]) # получить слова для тренировки
             form_training = TrainingForm(self.request.POST, words=user_dict)
             c_def = self.get_user_context(title='Training', form=form_training)
-        except IndexError:
+        except UnboundLocalError:
             c_def = self.get_user_context(title='Training', title_error='В вашем словаре слишком мало слов для повторения, минимум 5')
         finally:
-            return dict(list(context.items()) + list(c_def.items()))
+            return dict(list(context.items()) + list(c_def.items())) """
 
 @never_cache
 def result_training(request):
