@@ -34,7 +34,7 @@ class UserDictionaries(models.Model):
 
 class DatesLastAddedWordInUserDict(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь')
-    date_last_added_word = models.DateTimeField(verbose_name='последнее слово добавлено', default=timezone.now)
+    date_last_added_word = models.DateTimeField(verbose_name='последнее слово добавлено')
 
     def __str__(self) -> str:
         return f'{self.user} - {self.date_last_added_word}'
