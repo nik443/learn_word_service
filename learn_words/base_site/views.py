@@ -202,7 +202,7 @@ def result_training(request):
 
 
 
-
+""" fdf """
 
 
 
