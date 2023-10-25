@@ -135,3 +135,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+EMAIL_HOST = 'smtp.yandex.ru' # доменное имя почтового smtp-сервера яндекса
+EMAIL_PORT = 465 # порт почтового smtp-сервера яндекса
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True # тип защиты; может работать только один из _TLS, _SSL, в яндексе это _SSL
+EMAIL_HOST_USER = 'nikhram301@yandex.ru' # имя пользователя для аутентификации на SMPT-сервере
+EMAIL_HOST_PASSWORD = 'svvhzyjectjotwuq'
+DEFAULT_FROM_EMAIL = 'nikhram301@yandex.ru'

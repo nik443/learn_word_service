@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/nikita/Desktop/learning/base_learn_english/venv"
+VIRTUAL_ENV="/home/nikita/Desktop/learning/learn_word_service/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
