@@ -136,33 +136,33 @@ class LoginUser(MixinDataParams, LoginView):
     def get_success_url(self) -> str:
         return reverse_lazy('base_site:home')
     
+def logout_user(request):
+    logout(request) 
+    return redirect('base_site:login')
+    
 
 # сброс пароль для входа в аккаунт
 class UserPasswordResetView(PasswordResetView): 
-    template_name = 'base_site/reset_password.html'
+    template_name = 'base_site/user/authorization/reset_password.html'
     success_url = reverse_lazy("base_site:password_reset_done")
-    email_template_name = "base_site/letter_for_reset_password.html" # html-письмо с ссылкой на смену пароля
+    email_template_name = "base_site/user/authorization/letter_for_reset_password.html" # html-письмо с ссылкой на смену пароля
 
 
 # успешная отправка письма для восстановления пароля
 class UserPasswordResetDoneView(PasswordResetDoneView):
-    template_name = 'base_site/password_reset_done.html'
+    template_name = 'base_site/user/authorization/password_reset_done.html'
 
 
 # форма ввода нового пароля
 class UserPasswordResetConfirmView(PasswordResetConfirmView):
-    template_name = "base_site/password_reset_confirm.html"
+    template_name = "base_site/user/authorization/password_reset_confirm.html"
     success_url = reverse_lazy("base_site:password_reset_complete")
 
 
 # подтверждение успешной смены пароля
 class UserPasswordResetCompleteView(PasswordResetCompleteView):
-    template_name = "base_site/password_reset_complete.html"
+    template_name = "base_site/user/authorization/password_reset_complete.html"
 
-    
-def logout_user(request):
-    logout(request) 
-    return redirect('base_site:login')
 
 """ TRAINING USER'S WORD MECH """
 class Training(MixinDataParams, TemplateView):
