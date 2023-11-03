@@ -6,7 +6,7 @@ from django import forms
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import User
 from django.forms.utils import ErrorList
 
@@ -62,3 +62,18 @@ class TrainingForm(forms.Form):
         self.fields[self.words[2].word.word] = word2
         self.fields[self.words[3].word.word] = word3
         self.fields[self.words[4].word.word] = word4
+
+
+class UserPasswordResetForm(PasswordResetForm):
+    
+    """ def clean_email(self):
+        email = self.cleaned_data['email']
+        if not User.objects.filter(email=email).exists():
+            raise ValidationError('Пользователя с таким email не существует на сервисе')
+        return email """
+    
+    def clean_email(self): # проверка уникальности email
+        email = self.cleaned_data['email']
+        if User.objects.filter(email = email).exists():
+            return email
+        raise ValidationError('Пользователя с таким email не существует на сервисе')

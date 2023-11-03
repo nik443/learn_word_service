@@ -108,6 +108,8 @@ class UserDictionary(MixinDataParams, TemplateView):
 
 """ USER'S CABINET MECH AND"""
 
+""" REGISTRATION/AUTHORIZATION MECH """
+
 class RegisterUser(MixinDataParams, CreateView):    
     form_class = RegisterUserForm 
     template_name = 'base_site/register.html' 
@@ -122,7 +124,6 @@ class RegisterUser(MixinDataParams, CreateView):
         login(self.request, user)
         DatesLastAddedWordInUserDict.objects.create(user=self.request.user, date_last_added_word=(timezone.now() - timedelta(days=1)))
         return redirect('base_site:home')
-
 
 class LoginUser(MixinDataParams, LoginView):
     form_class = LoginUserForm 
@@ -140,29 +141,51 @@ def logout_user(request):
     logout(request) 
     return redirect('base_site:login')
     
-
 # сброс пароль для входа в аккаунт
-class UserPasswordResetView(PasswordResetView): 
+class UserPasswordResetView(MixinDataParams, PasswordResetView): 
     template_name = 'base_site/user/authorization/reset_password.html'
     success_url = reverse_lazy("base_site:password_reset_done")
     email_template_name = "base_site/user/authorization/letter_for_reset_password.html" # html-письмо с ссылкой на смену пароля
+    form_class = UserPasswordResetForm
+
+    def get_context_data(self, **kwargs: Any) -> Any:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context()
+        return dict(list(context.items()) + list(c_def.items()))
 
 
 # успешная отправка письма для восстановления пароля
-class UserPasswordResetDoneView(PasswordResetDoneView):
+class UserPasswordResetDoneView(MixinDataParams, PasswordResetDoneView):
     template_name = 'base_site/user/authorization/password_reset_done.html'
+
+    def get_context_data(self, **kwargs: Any) -> Any:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context()
+        return dict(list(context.items()) + list(c_def.items()))
 
 
 # форма ввода нового пароля
-class UserPasswordResetConfirmView(PasswordResetConfirmView):
+class UserPasswordResetConfirmView(MixinDataParams, PasswordResetConfirmView):
     template_name = "base_site/user/authorization/password_reset_confirm.html"
     success_url = reverse_lazy("base_site:password_reset_complete")
 
+    def get_context_data(self, **kwargs: Any) -> Any:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context()
+        return dict(list(context.items()) + list(c_def.items()))
+
 
 # подтверждение успешной смены пароля
-class UserPasswordResetCompleteView(PasswordResetCompleteView):
+class UserPasswordResetCompleteView(MixinDataParams, PasswordResetCompleteView):
     template_name = "base_site/user/authorization/password_reset_complete.html"
 
+    def get_context_data(self, **kwargs: Any) -> Any:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context()
+        return dict(list(context.items()) + list(c_def.items()))
+    
+
+""" REGISTRATION/AUTHORIZATION MECH END """
 
 """ TRAINING USER'S WORD MECH """
 class Training(MixinDataParams, TemplateView):
@@ -220,12 +243,5 @@ def result_training(request):
         })  
 
 """ TRAINING USER'S WORD MECH END """
-
-
-
-
-
-""" fdf """
-
 
 
