@@ -5,12 +5,13 @@ from typing import Any, Dict, Mapping, Optional, Type, Union
 from django import forms
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import User
 from django.forms.utils import ErrorList
 
 from .models import *
+from .utils import send_email_verify
 
 
 # Create your models here.
@@ -21,19 +22,30 @@ class RegisterUserForm(UserCreationForm):
     password2 = forms.CharField(label='Повтор пароля', widget=forms.PasswordInput(attrs={'class': 'form-input'}))
 
     class Meta:
-        model = User
+        model = MyUser
         fields = ('username', 'email', 'password1', 'password2')
 
-    def clean_email(self): # проверка уникальности email
-        email = self.cleaned_data['email']
-        if User.objects.filter(email = email).exists():
-            raise ValidationError('Пользователь с таким email уже зарегистрирован')
-        return email
 
+class MyAuthenticationForm(AuthenticationForm):
 
-class LoginUserForm(AuthenticationForm):
-    username = forms.CharField(label='Ник', widget=forms.TextInput(attrs={'class': 'form-input'}))
-    password = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+    def clean(self):
+        username = self.cleaned_data["username"]
+        password = self.cleaned_data["password"]
+
+        self.user_cache = authenticate(
+            self.request, username=username, password=password
+        )
+        if self.user_cache is not None:
+            if self.user_cache.email_verify:
+                return self.cleaned_data
+            else:
+                send_email_verify(self.request, self.user_cache)
+                raise ValidationError(
+                    'Неподтвержденный email, на вашу почту отправленно дополнительное письмо подтверждения!',
+                    code="inactive",
+                )
+        else:
+            raise ValidationError('Неправильно введен пароль или логин')
 
 
 class CreateWordInMasterDictForm(forms.ModelForm):

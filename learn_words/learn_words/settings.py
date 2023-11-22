@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
+AUTH_USER_MODEL = 'base_site.MyUser' # изменение базового класса User на пользовательский, размещенный в users.models
+#LOGIN_REDIRECT_URL = 'home' # перенаправление при успешном входе в аккаунт (аутентификации)
+#LOGOUT_REDIRECT_URL = 'home' # перенаправление при выходе из аккаунта
+
 # Application definition
 
 INSTALLED_APPS = [

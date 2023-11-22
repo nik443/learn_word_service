@@ -13,10 +13,7 @@
         <div class="form-error">{{ f.errors }}</div>
         {% endfor %}
 
-        {% if form.errors %}
-        <p>Неправильный пароль/логин</p>
-        {% endif %}
-
+        <p>{{ form.errors }}</p>
         <button type="submit">Войти</button>
 
         <a href="{% url 'base_site:password_reset' %}">Забыли пароль?</a>
