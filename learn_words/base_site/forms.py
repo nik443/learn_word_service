@@ -22,7 +22,7 @@ class RegisterUserForm(UserCreationForm):
     password2 = forms.CharField(label='Повтор пароля', widget=forms.PasswordInput(attrs={'class': 'form-input'}))
 
     class Meta:
-        model = MyUser
+        model = models.MyUser
         fields = ('username', 'email', 'password1', 'password2')
 
 
@@ -50,22 +50,26 @@ class MyAuthenticationForm(AuthenticationForm):
 
 class CreateWordInMasterDictForm(forms.ModelForm):
     class Meta:
-        model = MasterDictionaries
+        model = models.MasterDictionaries
         fields = ['word']
 
-      
+
 class TrainingForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
-
         self.words = kwargs.pop('words', None)
 
         # label - перевод
-        word0 = forms.CharField(label=self.words[0].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
-        word1 = forms.CharField(label=self.words[1].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
-        word2 = forms.CharField(label=self.words[2].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
-        word3 = forms.CharField(label=self.words[3].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
-        word4 = forms.CharField(label=self.words[4].word.translation, widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word0 = forms.CharField(label=self.words[0].word.translation,
+                                widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word1 = forms.CharField(label=self.words[1].word.translation,
+                                widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word2 = forms.CharField(label=self.words[2].word.translation,
+                                widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word3 = forms.CharField(label=self.words[3].word.translation,
+                                widget=forms.TextInput(attrs={'class': 'form-input'}))
+        word4 = forms.CharField(label=self.words[4].word.translation,
+                                widget=forms.TextInput(attrs={'class': 'form-input'}))
 
         # name - правильное значение
         super(TrainingForm, self).__init__(*args, **kwargs)
@@ -77,15 +81,9 @@ class TrainingForm(forms.Form):
 
 
 class UserPasswordResetForm(PasswordResetForm):
-    
-    """ def clean_email(self):
+
+    def clean_email(self):
         email = self.cleaned_data['email']
-        if not User.objects.filter(email=email).exists():
-            raise ValidationError('Пользователя с таким email не существует на сервисе')
-        return email """
-    
-    def clean_email(self): # проверка уникальности email
-        email = self.cleaned_data['email']
-        if User.objects.filter(email = email).exists():
+        if User.objects.filter(email=email).exists():
             return email
         raise ValidationError('Пользователя с таким email не существует на сервисе')

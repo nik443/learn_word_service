@@ -11,7 +11,7 @@ from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 
-from .models import UserDictionaries, MasterDictionaries, DatesLastAddedWordInUserDict
+from . import models
 
 
 class MixinDataParams:
@@ -51,9 +51,9 @@ class NewUserWord:
         self.user = user
         self.user_word = user_word
 
-    def try_to_add_user_word_in_his_dict(self):
+    def try_to_add_user_word_in_his_dict(self) -> str:
         try:
-            word = get_object_or_404(MasterDictionaries, word=self.user_word)
+            word = get_object_or_404(models.MasterDictionaries, word=self.user_word)
             if word.userdictionaries_set.filter(user=self.user).exists():
                 return "Введенное слово уже есть в вашем словаре"
 
@@ -64,26 +64,26 @@ class NewUserWord:
             if not translate_from_web:
                 return "Введенного слова не существует, может это сленг..."
 
-            new_word = MasterDictionaries(
+            new_word = models.MasterDictionaries(
                 word=self.user_word, translation=translate_from_web
             )
             new_word.save()
             NewUserWord.add_new_word_in_master_and_user_dict(self.user, new_word)
 
     @staticmethod
-    def add_new_word_in_master_and_user_dict(user, word):
-        UserDictionaries(user=user, word=word).save()
-        DatesLastAddedWordInUserDict.objects.filter(user=user).update(
+    def add_new_word_in_master_and_user_dict(user: models.MyUser, word: str) -> None:
+        models.UserDictionaries(user=user, word=word).save()
+        models.DatesLastAddedWordInUserDict.objects.filter(user=user).update(
             date_last_added_word=timezone.now()
         )
 
     @staticmethod
-    def check_user_word_in_web(user_word):
+    def check_user_word_in_web(user_word: str) -> str | None:
         url = "https://wooordhunt.ru/word/" + user_word
         response = requests.get(url, verify=False)
         soup = BeautifulSoup(response.text, "lxml")
         try:
             translate = soup.find("div", class_="t_inline_en").text
-            return translate[: translate.find(",")]  # return first translate version
+            return translate[: translate.find(",")]
         except AttributeError:
             return
