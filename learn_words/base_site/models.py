@@ -7,13 +7,14 @@ from django.utils import timezone
 
 class MyUser(AbstractUser):
     email = models.EmailField(
-        verbose_name='email address',
+        verbose_name='Email',
         unique=True
     )
     email_verify = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'email' # Строка, описывающая имя поля в модели пользователя, которое используется в качестве уникального идентификатора, по-умолчанию это username
-    REQUIRED_FIELDS = ['username'] # Список имен полей, которые будут запрашиваться при создании пользователя
+    USERNAME_FIELD = 'email'  # Строка, описывающая имя поля в модели пользователя, которое используется в качестве уникального идентификатора, по-умолчанию это username
+    REQUIRED_FIELDS = ['username']  # Список имен полей, которые будут запрашиваться при создании пользователя
+
 
 class MasterDictionaries(models.Model):
     word = models.CharField(max_length=46, verbose_name='слово', db_index=True)

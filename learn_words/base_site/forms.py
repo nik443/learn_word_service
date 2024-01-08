@@ -1,16 +1,9 @@
-from ast import literal_eval
-import random
-
-from typing import Any, Dict, Mapping, Optional, Type, Union
 from django import forms
-from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
-from django.contrib.auth.models import User
-from django.forms.utils import ErrorList
 
-from .models import *
+from . import models
 from .utils import send_email_verify
 
 
@@ -38,14 +31,14 @@ class MyAuthenticationForm(AuthenticationForm):
         if self.user_cache is not None:
             if self.user_cache.email_verify:
                 return self.cleaned_data
-            else:
-                send_email_verify(self.request, self.user_cache)
-                raise ValidationError(
-                    'Неподтвержденный email, на вашу почту отправленно дополнительное письмо подтверждения!',
-                    code="inactive",
-                )
+
+            send_email_verify(self.request, self.user_cache)
+            self.add_error(
+                "username",
+                'Неподтвержденный email, на вашу почту отправленно дополнительное письмо подтверждения!'
+            )
         else:
-            raise ValidationError('Неправильно введен пароль или логин')
+            self.add_error("password", "Неверный логин или пароль")
 
 
 class CreateWordInMasterDictForm(forms.ModelForm):
@@ -84,6 +77,6 @@ class UserPasswordResetForm(PasswordResetForm):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        if User.objects.filter(email=email).exists():
+        if models.MyUser.objects.filter(email=email).exists():
             return email
         raise ValidationError('Пользователя с таким email не существует на сервисе')
